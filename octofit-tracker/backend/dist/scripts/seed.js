@@ -8,7 +8,7 @@ const models_1 = require("../models");
 const mongoUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/octofit_db';
 async function seed() {
     console.log('Seed the octofit_db database with test data');
-    await mongoose_1.default.connect(mongoUri);
+    await mongoose_1.default.connect(mongoUri, { serverSelectionTimeoutMS: 5000 });
     await Promise.all([
         models_1.Activity.deleteMany({}),
         models_1.LeaderboardEntry.deleteMany({}),
