@@ -1,10 +1,10 @@
 import express from 'express'
 import mongoose, { type SortOrder } from 'mongoose'
+import { connectDatabase, mongoUri } from './config/database'
 import { type ApiCollection, labels, models } from './models'
 
 const app = express()
 const port = Number(process.env.PORT) || 8000
-const mongoUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/octofit_db'
 const codespaceName = process.env.CODESPACE_NAME
 const baseUrl = codespaceName
   ? `https://${codespaceName}-8000.app.github.dev`
@@ -123,7 +123,7 @@ app.get('/api/health', (_req, res) => {
 
 async function start() {
   try {
-    await mongoose.connect(mongoUri)
+    await connectDatabase()
     console.log(`MongoDB connected: ${mongoUri}`)
   } catch (error) {
     console.error('MongoDB connection failed:', error)
