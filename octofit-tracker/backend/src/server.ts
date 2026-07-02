@@ -5,12 +5,41 @@ import { type ApiCollection, labels, models } from './models'
 
 const app = express()
 const port = Number(process.env.PORT) || 8000
+const frontendPort = Number(process.env.FRONTEND_PORT) || 5173
 const codespaceName = process.env.CODESPACE_NAME
 const baseUrl = codespaceName
   ? `https://${codespaceName}-8000.app.github.dev`
   : `http://localhost:${port}`
+const frontendUrl = codespaceName
+  ? `https://${codespaceName}-${frontendPort}.app.github.dev`
+  : `http://localhost:${frontendPort}`
+const allowedOrigins = new Set([
+  baseUrl,
+  frontendUrl,
+  `http://localhost:${frontendPort}`,
+  `http://127.0.0.1:${frontendPort}`,
+])
 
 app.use(express.json())
+
+app.use((req, res, next) => {
+  const origin = req.headers.origin
+
+  if (origin && allowedOrigins.has(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin)
+  }
+
+  res.setHeader('Vary', 'Origin')
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS')
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(204)
+    return
+  }
+
+  next()
+})
 
 function registerCollectionRoutes(collection: ApiCollection) {
   const route = `/api/${collection}/`

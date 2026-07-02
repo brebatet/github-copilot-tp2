@@ -9,11 +9,35 @@ const database_1 = require("./config/database");
 const models_1 = require("./models");
 const app = (0, express_1.default)();
 const port = Number(process.env.PORT) || 8000;
+const frontendPort = Number(process.env.FRONTEND_PORT) || 5173;
 const codespaceName = process.env.CODESPACE_NAME;
 const baseUrl = codespaceName
     ? `https://${codespaceName}-8000.app.github.dev`
     : `http://localhost:${port}`;
+const frontendUrl = codespaceName
+    ? `https://${codespaceName}-${frontendPort}.app.github.dev`
+    : `http://localhost:${frontendPort}`;
+const allowedOrigins = new Set([
+    baseUrl,
+    frontendUrl,
+    `http://localhost:${frontendPort}`,
+    `http://127.0.0.1:${frontendPort}`,
+]);
 app.use(express_1.default.json());
+app.use((req, res, next) => {
+    const origin = req.headers.origin;
+    if (origin && allowedOrigins.has(origin)) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+    }
+    res.setHeader('Vary', 'Origin');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    if (req.method === 'OPTIONS') {
+        res.sendStatus(204);
+        return;
+    }
+    next();
+});
 function registerCollectionRoutes(collection) {
     const route = `/api/${collection}/`;
     const itemRoute = `/api/${collection}/:id`;
