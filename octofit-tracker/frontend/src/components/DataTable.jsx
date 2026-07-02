@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { endpointUrl, normalizeItems, valueForDisplay } from './api.js'
 
-function DataTable({ collection, columns, description, title }) {
+function DataTable({ collection, columns, description, endpoint, title }) {
   const [items, setItems] = useState([])
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(true)
@@ -14,7 +14,7 @@ function DataTable({ collection, columns, description, title }) {
       setError('')
 
       try {
-        const response = await fetch(endpointUrl(collection), { signal: controller.signal })
+        const response = await fetch(endpoint || endpointUrl(collection), { signal: controller.signal })
 
         if (!response.ok) {
           throw new Error(`Request failed with ${response.status}`)
@@ -36,7 +36,7 @@ function DataTable({ collection, columns, description, title }) {
     loadItems()
 
     return () => controller.abort()
-  }, [collection])
+  }, [collection, endpoint])
 
   return (
     <section className="data-section">
